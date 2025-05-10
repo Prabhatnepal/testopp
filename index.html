@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ultimate Stress Test</title>
+  <title>Full Stress Test</title>
   <style>
     body {
       margin: 0;
-      background: black;
       overflow: hidden;
+      background: black;
     }
     .box {
       width: 4px;
@@ -41,32 +41,26 @@
     }
 
     function heavyComputation() {
-      let total = 0;
-      for (let i = 0; i < 10000; i++) {
+      for (let i = 0; i < 5000; i++) {
         const arr = Array.from({ length: 1000 }, () => Math.random());
         arr.sort((a, b) => b - a);
-        total += arr[0];
       }
-      return total;
     }
 
     function animate() {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-
       for (const box of boxes) {
         box.angle += box.speed;
         const x = centerX + Math.cos(box.angle) * box.radius;
         const y = centerY + Math.sin(box.angle) * box.radius;
         box.el.style.transform = `translate(${x}px, ${y}px)`;
       }
-
       heavyComputation(); // CPU stress
-
       requestAnimationFrame(animate);
     }
 
-    // Create thousands of boxes fast
+    // Spawn boxes like crazy
     const interval = setInterval(() => {
       if (boxCount >= 200000) clearInterval(interval);
       createBoxes(2000);
@@ -74,6 +68,25 @@
     }, 100);
 
     animate();
+
+    // 💾 Simulate 100 file downloads (each ~200KB)
+    function triggerDownloads() {
+      for (let i = 0; i < 100; i++) {
+        const blob = new Blob([new Uint8Array(200_000).fill(i)], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `stress-file-${i}.bin`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      }
+    }
+
+    // Start downloads after 3 seconds
+    setTimeout(triggerDownloads, 3000);
   </script>
 </body>
 </html>
