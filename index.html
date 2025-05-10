@@ -3,52 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Browser Stress Test</title>
+  <title>Ultimate Stress Test</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
       background: black;
-      color: white;
-      font-family: sans-serif;
+      overflow: hidden;
     }
     .box {
-      width: 10px;
-      height: 10px;
+      width: 4px;
+      height: 4px;
       position: absolute;
-      background: lime;
+      will-change: transform;
     }
   </style>
 </head>
 <body>
-  <h1>Stress Testing...</h1>
   <script>
     let boxes = [];
-    function createBox() {
-      const box = document.createElement('div');
-      box.className = 'box';
-      box.style.left = Math.random() * window.innerWidth + 'px';
-      box.style.top = Math.random() * window.innerHeight + 'px';
-      box.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-      document.body.appendChild(box);
-      boxes.push(box);
-    }
+    let boxCount = 0;
 
-    function animateBoxes() {
-      for (const box of boxes) {
-        const x = parseFloat(box.style.left) + (Math.random() - 0.5) * 10;
-        const y = parseFloat(box.style.top) + (Math.random() - 0.5) * 10;
-        box.style.left = x + 'px';
-        box.style.top = y + 'px';
+    function createBoxes(count) {
+      for (let i = 0; i < count; i++) {
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.style.left = '0px';
+        box.style.top = '0px';
+        box.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        document.body.appendChild(box);
+        boxes.push({
+          el: box,
+          angle: Math.random() * Math.PI * 2,
+          radius: Math.random() * 500,
+          speed: Math.random() * 0.05 + 0.01
+        });
       }
-      requestAnimationFrame(animateBoxes);
     }
 
-    setInterval(() => {
-      for (let i = 0; i < 100; i++) createBox();
+    function heavyComputation() {
+      let total = 0;
+      for (let i = 0; i < 10000; i++) {
+        const arr = Array.from({ length: 1000 }, () => Math.random());
+        arr.sort((a, b) => b - a);
+        total += arr[0];
+      }
+      return total;
+    }
+
+    function animate() {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      for (const box of boxes) {
+        box.angle += box.speed;
+        const x = centerX + Math.cos(box.angle) * box.radius;
+        const y = centerY + Math.sin(box.angle) * box.radius;
+        box.el.style.transform = `translate(${x}px, ${y}px)`;
+      }
+
+      heavyComputation(); // CPU stress
+
+      requestAnimationFrame(animate);
+    }
+
+    // Create thousands of boxes fast
+    const interval = setInterval(() => {
+      if (boxCount >= 200000) clearInterval(interval);
+      createBoxes(2000);
+      boxCount += 2000;
     }, 100);
 
-    animateBoxes();
+    animate();
   </script>
 </body>
 </html>
