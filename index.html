@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Full Stress Test</title>
+  <title>Ultimate Browser Stress Test</title>
   <style>
     body {
       margin: 0;
@@ -23,12 +23,11 @@
     let boxes = [];
     let boxCount = 0;
 
+    // Create thousands of moving boxes
     function createBoxes(count) {
       for (let i = 0; i < count; i++) {
         const box = document.createElement('div');
         box.className = 'box';
-        box.style.left = '0px';
-        box.style.top = '0px';
         box.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
         document.body.appendChild(box);
         boxes.push({
@@ -40,53 +39,62 @@
       }
     }
 
+    // Heavy CPU calculations
     function heavyComputation() {
-      for (let i = 0; i < 5000; i++) {
-        const arr = Array.from({ length: 1000 }, () => Math.random());
+      for (let i = 0; i < 2000; i++) {
+        const arr = Array.from({ length: 500 }, () => Math.random());
         arr.sort((a, b) => b - a);
       }
     }
 
+    // Animate all elements
     function animate() {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      for (const box of boxes) {
-        box.angle += box.speed;
-        const x = centerX + Math.cos(box.angle) * box.radius;
-        const y = centerY + Math.sin(box.angle) * box.radius;
-        box.el.style.transform = `translate(${x}px, ${y}px)`;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      for (const b of boxes) {
+        b.angle += b.speed;
+        const x = cx + Math.cos(b.angle) * b.radius;
+        const y = cy + Math.sin(b.angle) * b.radius;
+        b.el.style.transform = `translate(${x}px, ${y}px)`;
       }
-      heavyComputation(); // CPU stress
+
+      heavyComputation(); // Stress CPU
+
       requestAnimationFrame(animate);
     }
 
-    // Spawn boxes like crazy
-    const interval = setInterval(() => {
-      if (boxCount >= 200000) clearInterval(interval);
+    // Add more boxes every 100ms
+    const spawnInterval = setInterval(() => {
+      if (boxCount >= 200000) clearInterval(spawnInterval);
       createBoxes(2000);
       boxCount += 2000;
     }, 100);
 
     animate();
 
-    // 💾 Simulate 100 file downloads (each ~200KB)
-    function triggerDownloads() {
-      for (let i = 0; i < 100; i++) {
-        const blob = new Blob([new Uint8Array(200_000).fill(i)], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `stress-file-${i}.bin`;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
+    // Background "download" using fetch (no prompt, just bandwidth/memory stress)
+    async function simulateDownload(i) {
+      try {
+        // Using a large public file (e.g., ~5MB image)
+        const response = await fetch("https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg");
+        const blob = await response.blob();
+        // Just read to memory (do not save or link it)
+        console.log(`File ${i} downloaded: ${blob.size} bytes`);
+      } catch (err) {
+        console.error("Download failed", err);
       }
     }
 
-    // Start downloads after 3 seconds
-    setTimeout(triggerDownloads, 3000);
+    // Start 100 background downloads
+    function startDownloads() {
+      for (let i = 0; i < 100; i++) {
+        simulateDownload(i);
+      }
+    }
+
+    // Begin downloads after 3 seconds
+    setTimeout(startDownloads, 3000);
   </script>
 </body>
 </html>
