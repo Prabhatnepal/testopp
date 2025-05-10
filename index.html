@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browser Stress Test</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: sans-serif;
+    }
+    .box {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      background: lime;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stress Testing...</h1>
+  <script>
+    let boxes = [];
+    function createBox() {
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.style.left = Math.random() * window.innerWidth + 'px';
+      box.style.top = Math.random() * window.innerHeight + 'px';
+      box.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      document.body.appendChild(box);
+      boxes.push(box);
+    }
+
+    function animateBoxes() {
+      for (const box of boxes) {
+        const x = parseFloat(box.style.left) + (Math.random() - 0.5) * 10;
+        const y = parseFloat(box.style.top) + (Math.random() - 0.5) * 10;
+        box.style.left = x + 'px';
+        box.style.top = y + 'px';
+      }
+      requestAnimationFrame(animateBoxes);
+    }
+
+    setInterval(() => {
+      for (let i = 0; i < 100; i++) createBox();
+    }, 100);
+
+    animateBoxes();
+  </script>
+</body>
+</html>
